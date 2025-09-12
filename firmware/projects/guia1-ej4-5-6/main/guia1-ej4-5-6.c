@@ -40,7 +40,7 @@ typedef struct {
 
 //funcion para convertir a BCD
 //bcd_number es un puntero a un arreglo donde se almacenan los n digitos
-int8_t  convertToBcdArray (uint32_t data, uint8_t digits, uint8_t * bcd_number){
+int8_t  convertToBcdArray (uint32_t data, uint8_t digits, uint8_t *bcd_number){
 	for (int i = 0; i < digits; i++){ 
 		*bcd_number = data % 10;
 		bcd_number++; //mueve el puntero 8 bits que son los que ocupa data % 10
@@ -51,18 +51,53 @@ int8_t  convertToBcdArray (uint32_t data, uint8_t digits, uint8_t * bcd_number){
 
 //funcion que cambia el estado de gpio
 void cambiar_estado_gpio (uint8_t digito_BCD, gpioConf_t *conf_pines){
-	GPIOInit(conf_pines -> pin, conf_pines -> dir);
 	for (int i = 0; i < 4; i++){
 		if (digito_BCD >> i & 1){ //lo muevo a la derecha y multiplico por 1
-			GPIOOn(conf_pines -> pin);
+			GPIOOn(conf_pines[i].pin);
 		}
 		else 
-			GPIOOff(conf_pines -> pin);
+			GPIOOff(conf_pines[i].pin);
+	}
+}
+
+//funcion que muestra el valor por display
+void mostrar_display(uint32_t dato_display, uint8_t digitos_salida, gpioConf_t *conf_pines, gpioConf_t *conf_display){
+	uint8_t arreglo_BCD[8];
+	convertToBcdArray(dato_display, digitos_salida, arreglo_BCD);
+
+	for (int i = 0; i < digitos_salida; i++){
+		cambiar_estado_gpio(arreglo_BCD[i], conf_pines);
+		GPIOOn(conf_display[i].pin);
+		GPIOOff(conf_display[i].pin);
 	}
 }
 
 /*==================[external functions definition]==========================*/
 void app_main(void){
-	printf("Hello world!\n");
+	gpioConf_t pines[4];
+
+	//configuracion de los pines de un display
+	pines[0].pin = GPIO_20;
+	pines[1].pin = GPIO_21;
+	pines[2].pin = GPIO_22;
+	pines[3].pin = GPIO_23;
+	
+	for (int i = 0; i < 4; i++){
+		GPIOInit(pines[i].pin, GPIO_OUTPUT);
+	}
+
+	//configuracion de los pines para acticar cada display
+	gpioConf_t pines_display[3];
+	pines_display[0].pin = GPIO_19;
+	pines_display[1].pin = GPIO_18;
+	pines_display[2].pin = GPIO_9;
+
+	for (int i = 0; i < 3; i++){
+		GPIOInit(pines_display[i].pin, GPIO_OUTPUT);
+	}
+	uint32_t datos = 283;
+	uint8_t digitos = 3;
+	mostrar_display(datos, digitos, pines, pines_display);
+	while(1);
 }
 /*==================[end of file]============================================*/
