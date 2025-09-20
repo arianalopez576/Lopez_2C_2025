@@ -34,13 +34,16 @@
 #include "hc_sr04.h"
 #include "lcditse0803.h"
 #include "switch.h"
+
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
-typedef struct {
-	gpio_t pin;			/*!< GPIO pin number */
-	io_t dir;			/*!< GPIO direction '0' IN;  '1' OUT*/
-}gpioConf_t;
+TaskHandle_t tarea_led_display = NULL;
+TaskHandle_t tarea_teclas = NULL;
+
+
+bool activacion = true;
+bool hold = false;
 
 /*==================[internal functions declaration]=========================*/
 void actualiza_LED (uint16_t distancia_cm){
@@ -63,43 +66,47 @@ void actualiza_LED (uint16_t distancia_cm){
 	}
 }
 
-/*==================[external functions definition]==========================*/
-void app_main(void){
-	LedsInit();
-
-	//echo y trigger
-	HcSr04Init(GPIO_3, GPIO_2);
-
-	LcdItsE0803Init();
-	SwitchesInit();
-	while (true){
-		uint16_t distancia = HcSr04ReadDistanceInCentimeters();
-		//distancia representada en los leds
-		actualiza_LED(distancia);
-
-		int8_t teclas;
-		teclas = SwitchesRead();
-
-		bool activacion = true;
-		bool hold = false;
-
-		if (activacion == true){
-		
-			if (hold == false){
+static void manejo_leds_display (void *puntero_tarea_led){
+    while (true){
+		if (activacion){
+			uint16_t distancia = HcSr04ReadDistanceInCentimeters();
+			//distancia representada en los leds
+			actualiza_LED(distancia);
+			if (!hold){
 				//distancia representada en el display
 				LcdItsE0803Write(distancia);
-				}
-			
-				switch(teclas){
-					case SWITCH_1:
-						activacion = ! false;
-					break;
-					case SWITCH_2:
-						hold = true;
-					break;		
-				}
+			}
 		}
+
 	vTaskDelay(1000/portTICK_PERIOD_MS);
 	}
+}
+static void manejo_teclas (void *puntero_tarea_teclas){
+while (true){
+	int8_t teclas;
+	teclas = SwitchesRead();
+	
+	switch(teclas){
+	case SWITCH_1:
+		activacion = ! activacion;
+	break;
+	case SWITCH_2:
+		hold = ! hold;
+	break;		
+	}
+	vTaskDelay(50/portTICK_PERIOD_MS);
+	}
+}
+
+/*==================[external functions definition]==========================*/
+void app_main(void){
+	//inicializaciones
+	LedsInit();
+	HcSr04Init(GPIO_3, GPIO_2);
+	LcdItsE0803Init();
+	SwitchesInit();
+
+	xTaskCreate(&manejo_leds_display, "LED_1", 512, NULL, 5, &tarea_led_display);
+	xTaskCreate(&manejo_teclas, "LED_2", 512, NULL, 5, &tarea_teclas);
 }
 /*==================[end of file]============================================*/
