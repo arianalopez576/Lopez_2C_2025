@@ -32,6 +32,9 @@
         },
         {
             "path": "projects/guia2_ej2"
+        },
+        {
+            "path": "projects/guia2_ej2_interrupciones"
         }
     ],
     "settings": {
