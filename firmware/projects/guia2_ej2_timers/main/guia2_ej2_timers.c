@@ -34,6 +34,7 @@
 #include "hc_sr04.h"
 #include "lcditse0803.h"
 #include "switch.h"
+#include "timer_mcu.h"
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
@@ -41,6 +42,8 @@ bool activacion = true;
 bool hold = false;
 
 TaskHandle_t tarea_led_display = NULL;
+TaskHandle_t tarea_tecla_1 = NULL;
+TaskHandle_t tarea_tecla_2 = NULL;
 
 /*==================[internal functions declaration]=========================*/
 void actualiza_LED (uint16_t distancia_cm){
@@ -65,6 +68,7 @@ void actualiza_LED (uint16_t distancia_cm){
 
 static void manejo_leds_display (void *puntero_tarea_led){
     while (true){
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 		if (activacion){
 			uint16_t distancia = HcSr04ReadDistanceInCentimeters();
 			//distancia representada en los leds
@@ -74,29 +78,45 @@ static void manejo_leds_display (void *puntero_tarea_led){
 				LcdItsE0803Write(distancia);
 			}
 		}
-	vTaskDelay(1000/portTICK_PERIOD_MS);
 	}
 }
 
-static void manejo_tecla_1 (void){
+//Funciones para enviar una notificacion
+void FuncTimerA(void *param){
+    vTaskNotifyGiveFromISR(tarea_led_display, pdFALSE);
+}
+
+static void manejo_tecla_1 (void *puntero_tarea_tecla_1){
 		activacion = ! activacion;
 }
 
-static void manejo_tecla_2 (void){
+static void manejo_tecla_2 (void *puntero_tarea_tecla_2){
 		hold = ! hold;	
 }
-
 
 /*==================[external functions definition]==========================*/
 void app_main(void){
 	LedsInit();
 	HcSr04Init(GPIO_3, GPIO_2);
 	LcdItsE0803Init();
+	//interrupciones teclas
 	SwitchesInit();
 	SwitchActivInt(SWITCH_1, manejo_tecla_1, NULL);
 	SwitchActivInt(SWITCH_2, manejo_tecla_2, NULL);
 
+	//Inicializacion de timer
+	timer_config_t timer_tarea_led_display = {
+        TIMER_A,
+        50000,
+        FuncTimerA,
+        NULL
+    };
+	TimerInit(&timer_tarea_led_display);
+	
+	//tarea
 	xTaskCreate(&manejo_leds_display, "LED_1", 512, NULL, 5, &tarea_led_display);
 
-}
+    //timers
+    TimerStart(timer_tarea_led_display.timer);
+}	
 /*==================[end of file]============================================*/
