@@ -38,6 +38,9 @@
         },
         {
             "path": "projects/guia2_ej2_timers"
+        },
+        {
+            "path": "projects/guia2-ej3"
         }
     ],
     "settings": {

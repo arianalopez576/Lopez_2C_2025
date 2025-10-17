@@ -64,7 +64,7 @@ int8_t  convertToBcdArray (uint32_t data, uint8_t digits, uint8_t *bcd_number){
  * @param conf_pines Puntero a un arreglo que almacena la configuracion de los pines 
  */
 void cambiar_estado_gpio (uint8_t digito_BCD, gpioConf_t *conf_pines){
-	for (int i = 0; i < 4; i++){
+	for (int i = 0; i < 4; i++){ //para los digitos
 		if (digito_BCD >> i & 1){ //lo muevo a la derecha y multiplico por 1
 			GPIOOn(conf_pines[i].pin);
 		}
@@ -84,7 +84,7 @@ void mostrar_display(uint32_t dato_display, uint8_t digitos_salida, gpioConf_t *
 	uint8_t arreglo_BCD[8];
 	convertToBcdArray(dato_display, digitos_salida, arreglo_BCD);
 
-	for (int i = 0; i < digitos_salida; i++){
+	for (int i = 0; i < digitos_salida; i++){ //se repite por cada digito que se debe mostrar
 		cambiar_estado_gpio(arreglo_BCD[i], conf_pines);
 		GPIOOn(conf_display[i].pin);
 		GPIOOff(conf_display[i].pin);

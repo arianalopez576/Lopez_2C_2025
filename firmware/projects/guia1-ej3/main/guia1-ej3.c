@@ -50,7 +50,6 @@ struct leds
 //declaro una funcion void para el control de los leds
 //esta funcion tiene como parametro un puntero al struct de leds
 	void control_leds (struct leds *my_leds){
-		//esta funcion es la que sigue el diagrama de flujos
 		//la flecha es un operador de acceso a miembros de un puntero
 		//----MODO ON----
 		if (my_leds -> mode == ON){
@@ -103,7 +102,7 @@ void app_main(void){
 	mi_led.n_led = LED_1;
 	mi_led.n_ciclos = 10;
 	mi_led.periodo = 500; //estos son milisegundos
-	control_leds(&mi_led);
+	control_leds(&mi_led); //& inidica la direccion de memoria del struct
 }
 
 

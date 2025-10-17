@@ -35,6 +35,7 @@
 #include "lcditse0803.h"
 #include "switch.h"
 #include "timer_mcu.h"
+#include "uart_mcu.h"
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data definition]===============================*/
@@ -42,8 +43,7 @@ bool activacion = true;
 bool hold = false;
 
 TaskHandle_t tarea_led_display = NULL;
-TaskHandle_t tarea_tecla_1 = NULL;
-TaskHandle_t tarea_tecla_2 = NULL;
+TaskHandle_t tarea_teclas = NULL;
 
 /*==================[internal functions declaration]=========================*/
 void actualiza_LED (uint16_t distancia_cm){
@@ -66,13 +66,20 @@ void actualiza_LED (uint16_t distancia_cm){
 	}
 }
 
+//Funcion para envio de la distancia por UART
+void Func_Uart (uint16_t p_dato){
+	char arreglo_dato[30];
+	sprintf(arreglo_dato, "Distancia: %u cm\r\n", p_dato); //%u para enteros decimales sin signo (la distancia)
+	UartSendString(UART_PC, arreglo_dato);
+}
+
 static void manejo_leds_display (void *puntero_tarea_led){
     while (true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 		if (activacion){
 			uint16_t distancia = HcSr04ReadDistanceInCentimeters();
-			//distancia representada en los leds
 			actualiza_LED(distancia);
+			Func_Uart(distancia);
 			if (!hold){
 				//distancia representada en el display
 				LcdItsE0803Write(distancia);
@@ -86,37 +93,46 @@ void FuncTimerA(void *param){
     vTaskNotifyGiveFromISR(tarea_led_display, pdFALSE);
 }
 
-static void manejo_tecla_1 (void *puntero_tarea_tecla_1){ 
-		activacion = ! activacion;
-}
 
-static void manejo_tecla_2 (void *puntero_tarea_tecla_2){
-		hold = ! hold;	
+void manejo_teclas(void *puntero_tarea_teclas){
+	uint8_t byte_leido;
+	UartReadByte(UART_PC, &byte_leido);
+	char tecla = (char)byte_leido;
+	if (tecla == 'O'){
+		activacion =! activacion;
+	}
+	if (tecla =='H'){
+		hold =! hold;
+	}
 }
-
 /*==================[external functions definition]==========================*/
 void app_main(void){
 	LedsInit();
 	HcSr04Init(GPIO_3, GPIO_2);
 	LcdItsE0803Init();
-	//interrupciones teclas
 	SwitchesInit();
-	SwitchActivInt(SWITCH_1, manejo_tecla_1, NULL);
-	SwitchActivInt(SWITCH_2, manejo_tecla_2, NULL);
 
 	//Inicializacion de timer
 	timer_config_t timer_tarea_led_display = {
         TIMER_A,
-        50000,
+        1000000,
         FuncTimerA,
         NULL
     };
 	TimerInit(&timer_tarea_led_display);
 	
-	//tarea
-	xTaskCreate(&manejo_leds_display, "LED_1", 512, NULL, 5, &tarea_led_display);
-
-    //timers
     TimerStart(timer_tarea_led_display.timer);
-}	
+
+	//tarea
+	xTaskCreate(&manejo_leds_display, "LED_1", 2048, NULL, 5, &tarea_led_display);
+	
+	//UART
+	serial_config_t config_UART = {
+		UART_PC,
+		9600,
+		manejo_teclas,
+		NULL
+	};
+	UartInit(&config_UART);
+}
 /*==================[end of file]============================================*/

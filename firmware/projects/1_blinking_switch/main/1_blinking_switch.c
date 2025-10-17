@@ -15,13 +15,14 @@
  */
 
 /*==================[inclusions]=============================================*/
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "led.h"
-#include "switch.h"
+#include <stdio.h> //se usa para entrada/salida, no se usa en este caso
+#include <stdint.h> //permite definir el tipo uint8_t
+#include <stdbool.h> //para variables del tipo true/false
+#include "freertos/FreeRTOS.h" //para la constante portickperiod
+#include "freertos/task.h" //para el vtaskdelay
+#include "led.h" //funciones led 
+#include "switch.h" //funciones teclas
+
 /*==================[macros and definitions]=================================*/
 #define CONFIG_BLINK_PERIOD 1000
 /*==================[internal data definition]===============================*/
