@@ -1,28 +1,33 @@
-/*! @mainpage Template
+/** @mainpage Proyecto 2 Ejercicio 2
  *
  * @section genDesc General Description
  *
- * This section describes how the program works.
+ * El programa utiliza dos tareas, una para el manejo de los leds y display y la otra
+ * para el manejo de las teclas.
  *
- * <a href="https://drive.google.com/...">Operation Example</a>
  *
  * @section hardConn Hardware Connection
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
- *
- *
+ * | 			 	| 	GPIO_9		|
+ * |				|	GPIO_18		|
+ * |				|	GPIO_19		|
+ * |	 LCD		|	GPIO_20		|
+ * |				|	GPIO_21		|
+ * |				|	GPIO_22		|
+ * |				|	GPIO_23		|
+ * 
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 24/10/2025 |   Se documenta								 |
+ * | 24/10/2025 |   Se finaliza la documentacion				 |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Ariana Lopez (lopezariana576@gmail.com)
  *
  */
-
 /*==================[inclusions]=============================================*/
 #include <stdio.h>
 #include <stdint.h>
@@ -46,6 +51,10 @@ bool activacion = true;
 bool hold = false;
 
 /*==================[internal functions declaration]=========================*/
+/** 
+ * @brief Enciende o apaga los distintos LEDs dependiendo del valor de distancia medido
+ * @param distancia_cm Dato medido por el sensor
+*/
 void actualiza_LED (uint16_t distancia_cm){
 	if (distancia_cm < 10){
 		LedOff(LED_1);
@@ -65,7 +74,10 @@ void actualiza_LED (uint16_t distancia_cm){
 		LedOn(LED_3);
 	}
 }
-
+/** 
+ * @brief Modifica el encendido/apagado de LEDs y el manejo de las teclas
+ * @param puntero_tarea_led Puntero a un arreglo que contiene la tarea de leds y dissplay
+*/
 static void manejo_leds_display (void *puntero_tarea_led){
     while (true){
 		if (activacion){
@@ -81,6 +93,10 @@ static void manejo_leds_display (void *puntero_tarea_led){
 	vTaskDelay(1000/portTICK_PERIOD_MS);
 	}
 }
+/** 
+ * @brief Maneja las teclas y modifica una variable cuando una de ellas es presionada.
+ * @param puntero_tarea_teclas Puntero a un arreglo que contiene la tarea de las teclas
+*/
 static void manejo_teclas (void *puntero_tarea_teclas){
 while (true){
 	int8_t teclas;

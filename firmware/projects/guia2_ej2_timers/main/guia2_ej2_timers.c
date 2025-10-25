@@ -1,25 +1,31 @@
-/*! @mainpage Template
+/*! @mainpage Proyecto 2 Ejercicio 2 utilizando timers
  *
  * @section genDesc General Description
  *
- * This section describes how the program works.
- *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * El programa tiene una tarea notificada por un temporizador, además a través de interrupciones 
+ * se realiza el manejo de teclas. 
  *
  * @section hardConn Hardware Connection
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 			 	| 	GPIO_9		|
+ * |				|	GPIO_18		|
+ * |				|	GPIO_19		|
+ * |	 LCD		|	GPIO_20		|
+ * |				|	GPIO_21		|
+ * |				|	GPIO_22		|
+ * |				|	GPIO_23		|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 24/10/2023 | Se documenta 			                         |
+ * | 24/10/2025 | Se finaliza la documentacion 					 |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Ariana Lopez (lopezariana576@gmail.com)
  *
  */
 
@@ -46,6 +52,10 @@ TaskHandle_t tarea_tecla_1 = NULL;
 TaskHandle_t tarea_tecla_2 = NULL;
 
 /*==================[internal functions declaration]=========================*/
+/** 
+ * @brief Enciende o apaga los distintos LEDs dependiendo del valor de distancia medido
+ * @param distancia_cm Dato medido por el sensor
+*/
 void actualiza_LED (uint16_t distancia_cm){
 	if (distancia_cm < 10){
 		LedOff(LED_1);
@@ -66,6 +76,10 @@ void actualiza_LED (uint16_t distancia_cm){
 	}
 }
 
+/** 
+ * @brief Modifica el encendido/apagado de LEDs y el manejo de las teclas
+ * @param puntero_tarea_led Puntero a un arreglo que contiene la tarea de leds y dissplay
+*/
 static void manejo_leds_display (void *puntero_tarea_led){
     while (true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
@@ -82,14 +96,24 @@ static void manejo_leds_display (void *puntero_tarea_led){
 }
 
 //Funciones para enviar una notificacion
+/** 
+ * @brief Envia una notificacion
+ * @param param Puntero a un arreglo
+*/
 void FuncTimerA(void *param){
     vTaskNotifyGiveFromISR(tarea_led_display, pdFALSE);
 }
-
+/** 
+ * @brief Modifica la variable que activa/desactiva la medicion del sensor
+ * @param puntero_tarea_tecla_1 Puntero a la tarea de la tecla 1
+*/
 static void manejo_tecla_1 (void *puntero_tarea_tecla_1){ 
 		activacion = ! activacion;
 }
-
+/** 
+ * @brief Modifica la variable que congela el valor mostrado en el display
+ * @param puntero_tarea_tecla_1 Puntero a la tarea de la tecla 1
+*/
 static void manejo_tecla_2 (void *puntero_tarea_tecla_2){
 		hold = ! hold;	
 }

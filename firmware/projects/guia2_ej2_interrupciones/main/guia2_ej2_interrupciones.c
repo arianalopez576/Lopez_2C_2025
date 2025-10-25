@@ -2,24 +2,30 @@
  *
  * @section genDesc General Description
  *
- * This section describes how the program works.
- *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * El programa maneja los leds y display mediante una tarea y a través de interrupciones
+ * controla la tecla.
  *
  * @section hardConn Hardware Connection
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 			 	| 	GPIO_9		|
+ * |				|	GPIO_18		|
+ * |				|	GPIO_19		|
+ * |	 LCD		|	GPIO_20		|
+ * |				|	GPIO_21		|
+ * |				|	GPIO_22		|
+ * |				|	GPIO_23		|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * |  24/10/25  | Se documenta                      		     |
+ * |  24/10/25  | Se finaliza la documentacion					 |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Ariana Lopez (lopezariana576@gmail.com)
  *
  */
 
@@ -43,6 +49,10 @@ bool hold = false;
 TaskHandle_t tarea_led_display = NULL;
 
 /*==================[internal functions declaration]=========================*/
+/** 
+ * @brief Enciende o apaga los distintos LEDs dependiendo del valor de distancia medido
+ * @param distancia_cm Dato medido por el sensor
+*/
 void actualiza_LED (uint16_t distancia_cm){
 	if (distancia_cm < 10){
 		LedOff(LED_1);
@@ -62,7 +72,10 @@ void actualiza_LED (uint16_t distancia_cm){
 		LedOn(LED_3);
 	}
 }
-
+/** 
+ * @brief Modifica el encendido/apagado de LEDs y el manejo de las teclas
+ * @param puntero_tarea_led Puntero a un arreglo que contiene la tarea de leds y dissplay
+*/
 static void manejo_leds_display (void *puntero_tarea_led){
     while (true){
 		if (activacion){
@@ -78,10 +91,16 @@ static void manejo_leds_display (void *puntero_tarea_led){
 	}
 }
 
+/** 
+ * @brief Modifica la variable que activa/desactiva la medicion del sensor
+*/
 static void manejo_tecla_1 (void){
 		activacion = ! activacion;
 }
 
+/** 
+ * @brief Modifica la variable que congela el valor mostrado en el display
+*/
 static void manejo_tecla_2 (void){
 		hold = ! hold;	
 }

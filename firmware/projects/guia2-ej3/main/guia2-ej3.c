@@ -1,25 +1,33 @@
-/*! @mainpage Template
+/*! @mainpage Proyecto 2 Ejercicio 3
  *
  * @section genDesc General Description
  *
- * This section describes how the program works.
- *
- * <a href="https://drive.google.com/...">Operation Example</a>
+ * El programa permite leer una distancia a través del sensor, mostrar el mismo en el display
+ * y dependiendo de este valor se enciende una combinación distinta de LEDs.
+ * Además, el dato medido se envía por UART y a través de dos teclas se puede congelar el valor
+ * mostrado en el display o detener la medición. 
  *
  * @section hardConn Hardware Connection
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
+ * | 			 	| 	GPIO_9		|
+ * |				|	GPIO_18		|
+ * |				|	GPIO_19		|
+ * |	 LCD		|	GPIO_20		|
+ * |				|	GPIO_21		|
+ * |				|	GPIO_22		|
+ * |				|	GPIO_23		|
  *
  *
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 24/10/2023 | Se documenta 			                         |
+ * | 24/10/2025 | Se finaliza la documentacion 					 |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Ariana Lopez (lopezariana576@gmail.com)
  *
  */
 
@@ -46,6 +54,10 @@ TaskHandle_t tarea_led_display = NULL;
 TaskHandle_t tarea_teclas = NULL;
 
 /*==================[internal functions declaration]=========================*/
+/** 
+ * @brief Enciende o apaga los distintos LEDs dependiendo del valor de distancia medido
+ * @param distancia_cm Dato medido por el sensor
+*/
 void actualiza_LED (uint16_t distancia_cm){
 	if (distancia_cm < 10){
 		LedOff(LED_1);
@@ -67,12 +79,20 @@ void actualiza_LED (uint16_t distancia_cm){
 }
 
 //Funcion para envio de la distancia por UART
+/** 
+ * @brief Envia el dato medido de la distancia por UART
+ * @param p_dato Dato medido por el sensor
+*/
 void Func_Uart (uint16_t p_dato){
 	char arreglo_dato[30];
 	sprintf(arreglo_dato, "Distancia: %u cm\r\n", p_dato); //%u para enteros decimales sin signo (la distancia)
 	UartSendString(UART_PC, arreglo_dato);
 }
 
+/** 
+ * @brief Modifica el encendido/apagado de LEDs y el manejo de las teclas
+ * @param puntero_tarea_led Puntero a un arreglo que contiene la tarea de leds y dissplay
+*/
 static void manejo_leds_display (void *puntero_tarea_led){
     while (true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
@@ -89,11 +109,18 @@ static void manejo_leds_display (void *puntero_tarea_led){
 }
 
 //Funciones para enviar una notificacion
+/** 
+ * @brief Envia una notificacion
+ * @param param Puntero a un arreglo
+*/
 void FuncTimerA(void *param){
     vTaskNotifyGiveFromISR(tarea_led_display, pdFALSE);
 }
 
-
+/** 
+ * @brief Maneja las teclas y modifica una variable cuando una de ellas es presionada.
+ * @param puntero_tarea_teclas Puntero a un arreglo que contiene la tarea de las teclas
+*/
 void manejo_teclas(void *puntero_tarea_teclas){
 	uint8_t byte_leido;
 	UartReadByte(UART_PC, &byte_leido);

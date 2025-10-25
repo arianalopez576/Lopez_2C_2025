@@ -1,27 +1,35 @@
-/*! @mainpage Template
+/** @mainpage Proyecto 2 Ejercicio 1 Inciso 1
  *
  * @section genDesc General Description
  *
- * This section describes how the program works.
+ * El programa permite medir la distancia a través de un sensor, y dependiendo de la misma
+ * enciende los distintos LEDs. Además, el valor de la distancia se muestra en un display.
+ * Las teclas permiten detener y retomar la medición o sólo detener y retomar los datos
+ * mostrados en el display
  *
- * <a href="https://drive.google.com/...">Operation Example</a>
- *
- * @section hardConn Hardware Connection
+ * * @section hardConn Hardware Connection
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
- *
- *
+ * | 			 	| 	GPIO_9		|
+ * |				|	GPIO_18		|
+ * |				|	GPIO_19		|
+ * |	 LCD		|	GPIO_20		|
+ * |				|	GPIO_21		|
+ * |				|	GPIO_22		|
+ * |				|	GPIO_23		|
+ * 
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 24/10/2025 |   Se documenta								 |
+ * | 24/10/2025 |   Se finaliza la documentacion				 |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Ariana Lopez (lopezariana576@gmail.com)
  *
  */
+
 
 /*==================[inclusions]=============================================*/
 #include <stdio.h>
@@ -43,6 +51,10 @@ typedef struct {
 }gpioConf_t;
 
 /*==================[internal functions declaration]=========================*/
+/** 
+ * @brief Enciende o apaga los distintos LEDs dependiendo del valor de distancia medido
+ * @param distancia_cm Dato medido por el sensor
+*/
 void actualiza_LED (uint16_t distancia_cm){
 	if (distancia_cm < 10){
 		LedOff(LED_1);

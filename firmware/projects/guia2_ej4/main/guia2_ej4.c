@@ -1,25 +1,27 @@
-/*! @mainpage Template
+/** @mainpage Proyecto 2 Ejercicio 4
  *
  * @section genDesc General Description
  *
- * This section describes how the program works.
+ * El programa convierte datos analogicos a digitales, permite enviarlos por la UART y también
+ * convierte digital a analogico. Estas dos funciones las realiza mediante dos tareas notificadas
+ * por una funcion.
  *
- * <a href="https://drive.google.com/...">Operation Example</a>
  *
  * @section hardConn Hardware Connection
  *
  * |    Peripheral  |   ESP32   	|
  * |:--------------:|:--------------|
- * | 	PIN_X	 	| 	GPIO_X		|
- *
- *
+ * | 	Salida	 	| 	CHANNEL_0	|
+ * |	Entrada		|	CHANNEL_1	|
+ * 
  * @section changelog Changelog
  *
  * |   Date	    | Description                                    |
  * |:----------:|:-----------------------------------------------|
- * | 12/09/2023 | Document creation		                         |
+ * | 24/10/2025 |   Se documenta								 |
+ * | 24/10/2025 |   Se finaliza la documentacion				 |
  *
- * @author Albano Peñalva (albano.penalva@uner.edu.ar)
+ * @author Ariana Lopez (lopezariana576@gmail.com)
  *
  */
 
@@ -32,7 +34,6 @@
 #include "uart_mcu.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "pwm_mcu.h"
 
 /*==================[macros and definitions]=================================*/
 #define tamano_ECG (sizeof(ECG)/sizeof(ECG[0]))
@@ -51,10 +52,17 @@ TaskHandle_t tarea_AD = NULL;
 TaskHandle_t tarea_DA = NULL;
 
 /*==================[internal functions declaration]=========================*/
+/** 
+ * @brief Envia notificación para la tarea analogico-digital
+ * @param param Puntero a un parametro
+*/
 void FuncTimerA(void *param){
     vTaskNotifyGiveFromISR(tarea_AD, pdFALSE);
 }
 
+/** 
+ * @brief Convierte de analogico a digital y luego envia los datos por la UART
+*/
 void convertir_enviar_AD (){
 	 while (true){
 		uint16_t dato;
@@ -71,19 +79,25 @@ void convertir_enviar_AD (){
 }
 
 //otro timer otra interrupcion
+/** 
+ * @brief Envia notificación para la tarea digital-analogico
+ * @param param Puntero a un parametro
+*/
 void FuncTimerB(void *param){
     vTaskNotifyGiveFromISR(tarea_DA, pdFALSE);
 }
 
+/** 
+ * @brief Convierte digital a analogico
+*/
 void convertir_DA (){
 	int i = 0;
 	while(true){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-	
 		AnalogOutputWrite(ECG[i]);
-		  i++; 
+		i++; 
 		if (i == tamano_ECG)
-		  i=0;
+		i=0;
 	}   
 }
 
@@ -133,8 +147,5 @@ void app_main(void){
 		NULL
 	};
 	UartInit(&config_UART);
-
-
-
 }
 /*==================[end of file]============================================*/
